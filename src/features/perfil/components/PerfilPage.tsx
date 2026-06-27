@@ -1,5 +1,6 @@
 import { useAuthStore } from '../../auth/store/authStore'
 import { FiUser, FiMail, FiBook } from 'react-icons/fi'
+import { ContactosEmergenciaSection } from './ContactosEmergenciaSection'
 
 const NIVEL_LABEL: Record<string, string> = {
   BASICOS:       'Básicos',
@@ -75,6 +76,8 @@ export const PerfilPage = () => {
           Cerrar sesión
         </button>
       </div>
+
+      <ContactosEmergenciaSection />
     </div>
   )
 }
