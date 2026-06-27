@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { FiLock, FiEye, FiEyeOff, FiUser, FiFileText, FiLoader, FiMail } from 'react-icons/fi'
+import { FiLock, FiEye, FiEyeOff, FiUser, FiFileText, FiLoader, FiMail, FiAlertTriangle } from 'react-icons/fi'
 import imgLogo from '../../../assets/img/GESAPLogo.svg'
 import { useAuthStore } from '../store/authStore'
 import toast from 'react-hot-toast'
@@ -16,6 +16,8 @@ export const LoginForm = () => {
   const [showPass, setShowPass] = useState(false)
   const { login, loading, error } = useAuthStore()
   const navigate = useNavigate()
+
+  const wasKicked = new URLSearchParams(window.location.search).get('kicked') === 'true'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +85,16 @@ export const LoginForm = () => {
             <h2 className="text-[#0A2647] text-2xl font-bold">Iniciar Sesión</h2>
             <p className="text-slate-500 text-sm mt-1">Accede con tu correo institucional</p>
           </div>
+
+          {wasKicked && (
+            <div className="mb-5 bg-amber-50 border border-amber-200 text-amber-800 text-sm rounded-xl px-4 py-3 flex items-start gap-2.5">
+              <FiAlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
+              <span>
+                <strong className="font-semibold">Sesión cerrada.</strong>{' '}
+                Un administrador ha cerrado tu sesión activa.
+              </span>
+            </div>
+          )}
 
           {error && (
             <div className="mb-5 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
