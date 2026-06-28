@@ -7,6 +7,7 @@ import { MainLayout } from '../../shared/components/layouts/MainLayout'
 import { MisVisitasPage } from '../../features/visitas/components/MisVisitasPage'
 import { MisDocumentosPage } from '../../features/documentos/components/MisDocumentosPage'
 import { PerfilPage } from '../../features/perfil/components/PerfilPage'
+import { AlertasPage } from '../../features/alertas/components/AlertasPage'
 
 export const AppRoutes = () => (
   <Routes>
@@ -16,6 +17,7 @@ export const AppRoutes = () => (
     <Route path="/portal" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
       <Route index element={<MisVisitasPage />} />
       <Route path="documentos" element={<MisDocumentosPage />} />
+      <Route path="alertas" element={<AlertasPage />} />
       <Route path="perfil" element={<PerfilPage />} />
     </Route>
     <Route path="*" element={<Navigate to="/login" replace />} />

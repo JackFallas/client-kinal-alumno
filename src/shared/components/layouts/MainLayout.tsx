@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { FiActivity, FiFolder, FiUser, FiLogOut, FiX, FiMenu } from 'react-icons/fi'
+import { FiActivity, FiFolder, FiUser, FiBell, FiLogOut, FiX, FiMenu } from 'react-icons/fi'
 import imgLogo from '../../../assets/img/GESAPLogo.svg'
 import { useAuthStore } from '../../../features/auth/store/authStore'
 import toast from 'react-hot-toast'
@@ -8,6 +8,7 @@ import toast from 'react-hot-toast'
 const navItems = [
   { to: '/portal',           icon: FiActivity, label: 'Mis visitas',    end: true  },
   { to: '/portal/documentos', icon: FiFolder,   label: 'Mis documentos', end: false },
+  { to: '/portal/alertas',   icon: FiBell,     label: 'Alertas',        end: false },
   { to: '/portal/perfil',    icon: FiUser,     label: 'Mi perfil',      end: false },
 ]
 
