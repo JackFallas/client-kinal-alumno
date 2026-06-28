@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { FiActivity, FiFolder, FiUser, FiBell, FiLogOut, FiX, FiMenu } from 'react-icons/fi'
 import imgLogo from '../../../assets/img/GESAPLogo.svg'
 import { useAuthStore } from '../../../features/auth/store/authStore'
+import { UserMenu } from '../UserMenu'
 import toast from 'react-hot-toast'
 
 const navItems = [
@@ -80,8 +81,12 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
 
       <div className="border-t border-white/10 p-4">
         <div className="flex items-center gap-3 px-1">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00ACC1] to-[#26A69A] flex items-center justify-center shrink-0 shadow-md text-white text-sm font-bold">
-            {initials}
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#00ACC1] to-[#26A69A] flex items-center justify-center shrink-0 shadow-md text-white text-sm font-bold overflow-hidden">
+            {user?.fotoPerfil ? (
+              <img src={`/${user.fotoPerfil}`} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              initials
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-white text-sm font-semibold truncate">{displayName}</p>
@@ -102,10 +107,6 @@ const Sidebar = ({ isOpen = false, onClose }: SidebarProps) => {
 }
 
 const Navbar = ({ onMenuOpen }: { onMenuOpen: () => void }) => {
-  const { user } = useAuthStore()
-  const displayName = user ? `${user.primerNombre} ${user.primerApellido}`.trim() : 'Estudiante'
-  const initials    = displayName.split(' ').slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('')
-
   return (
     <header className="bg-white/70 backdrop-blur-md border-b border-blue-100 px-4 lg:px-6 h-16 flex items-center justify-between sticky top-0 z-40 shrink-0">
       <div className="flex items-center gap-3">
@@ -118,15 +119,7 @@ const Navbar = ({ onMenuOpen }: { onMenuOpen: () => void }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className="text-right hidden sm:block">
-          <p className="text-sm font-bold text-[#0A2647] leading-tight">{displayName}</p>
-          <p className="text-xs text-slate-400">Estudiante</p>
-        </div>
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#0E6BA8] to-[#00ACC1] flex items-center justify-center text-white text-sm font-bold shadow-md">
-          {initials || <FiUser size={15} />}
-        </div>
-      </div>
+      <UserMenu />
     </header>
   )
 }

@@ -21,12 +21,17 @@ export const PerfilPage = () => {
       <div className="bg-white rounded-xl border border-blue-50 shadow-sm p-6">
         {/* Avatar */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0E6BA8] to-[#00ACC1] flex items-center justify-center text-white text-2xl font-bold shadow-md">
-            {initials}
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#0E6BA8] to-[#00ACC1] flex items-center justify-center text-white text-2xl font-bold shadow-md overflow-hidden shrink-0">
+            {user.fotoPerfil ? (
+              <img src={`/${user.fotoPerfil}`} alt={displayName} className="w-full h-full object-cover" />
+            ) : (
+              initials
+            )}
           </div>
           <div>
             <p className="text-lg font-bold text-[#0A2647]">{displayName}</p>
             <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Estudiante</span>
+            <p className="text-xs text-slate-400 mt-1">Para cambiar tu foto, usa el menú de tu avatar arriba a la derecha</p>
           </div>
         </div>
 

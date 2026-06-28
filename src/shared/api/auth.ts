@@ -13,6 +13,7 @@ export interface AuthUser {
   role: 'ESTUDIANTE'
   nivelAcademico?: NivelAcademico
   seccion?: { id: number; codigo: string; nombre: string }
+  fotoPerfil?: string | null
 }
 
 export const loginApi = (email: string, password: string) =>
@@ -21,6 +22,13 @@ export const loginApi = (email: string, password: string) =>
 export const logoutApi = () => api.post('/auth/logout')
 
 export const getMeApi = () => api.get<AuthUser>('/auth/me')
+
+export const cambiarFotoPerfilApi = (formData: FormData) =>
+  api.post<{ fotoPerfil: string }>('/usuarios/foto-perfil', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+
+export const eliminarFotoPerfilApi = () => api.delete('/usuarios/foto-perfil')
 
 export const registrarApi = (data: {
   carnet?: string
