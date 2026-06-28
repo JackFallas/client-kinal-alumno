@@ -46,8 +46,7 @@ export const MisVisitasPage = () => {
                         <FiThermometer size={10} /> {v.temperatura}°C
                       </span>
                     )}
-                    {v.presion && <span className="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">💉 {v.presion}</span>}
-                    {v.peso && <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full">⚖ {v.peso} kg</span>}
+                    {v.requiereRetirarse && <span className="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-medium">🚸 Requirió retirarse</span>}
                   </div>
                   {v.tratamiento && (
                     <p className="text-xs text-slate-500 mt-1.5 bg-slate-50 rounded-lg px-2 py-1">
