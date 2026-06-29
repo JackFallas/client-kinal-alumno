@@ -150,6 +150,9 @@ export const LoginForm = () => {
                   {showPass ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                 </button>
               </div>
+              <div className="text-right mt-1.5">
+                <Link to="/olvide-password" className="text-xs text-[#0E6BA8] font-semibold hover:underline">¿Olvidaste tu contraseña?</Link>
+              </div>
             </div>
 
             <button
