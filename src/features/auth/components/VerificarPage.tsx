@@ -11,6 +11,7 @@ export const VerificarPage = () => {
   const tokenParam = params.get('token') ?? undefined
   const emailParam = params.get('email') ?? ''
 
+  const [step, setStep]           = useState<'email' | 'code'>(emailParam ? 'code' : 'email')
   const [digits, setDigits]       = useState(['', '', '', '', '', ''])
   const [loading, setLoading]     = useState(false)
   const [resending, setResending] = useState(false)
@@ -18,7 +19,22 @@ export const VerificarPage = () => {
   const [email, setEmail]         = useState(emailParam)
   const inputRefs                 = useRef<(HTMLInputElement | null)[]>([])
 
-  useEffect(() => { inputRefs.current[0]?.focus() }, [])
+  useEffect(() => { if (step === 'code') inputRefs.current[0]?.focus() }, [step])
+
+  const handleSendCode = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) { toast.error('Ingresa tu correo'); return }
+    setResending(true)
+    try {
+      await reenviarCodigoApi(email)
+      toast.success('Código enviado. Revisa tu correo.')
+      setStep('code')
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message ?? 'Error al enviar el código')
+    } finally {
+      setResending(false)
+    }
+  }
 
   const handleChange = (i: number, val: string) => {
     const char = val.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(-1)
@@ -93,13 +109,48 @@ export const VerificarPage = () => {
     )
   }
 
+  if (step === 'email') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#0A2647] via-[#144272] to-[#0E6BA8] flex items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-6">
+            <img src={imgLogo} alt="GESAP" className="h-12 mx-auto mb-3 drop-shadow-lg" />
+            <h1 className="text-white text-2xl font-extrabold tracking-tight">Verificar cuenta</h1>
+            <p className="text-blue-200 text-sm mt-1">Ingresa tu correo para enviarte el código</p>
+          </div>
+
+          <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 sm:p-8">
+            <form onSubmit={handleSendCode} className="space-y-6">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Tu correo</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                  placeholder="tu@kinal.edu.gt" autoFocus
+                  className="w-full border border-blue-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00ACC1] bg-white" />
+              </div>
+
+              <button type="submit" disabled={resending}
+                className="w-full bg-gradient-to-r from-[#0A2647] to-[#0E6BA8] hover:from-[#144272] hover:to-[#00ACC1] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-sm disabled:opacity-60">
+                {resending ? 'Enviando...' : 'Enviar código'}
+              </button>
+
+              <p className="text-center text-xs text-slate-400">
+                ¿Ya tienes cuenta verificada?{' '}
+                <Link to="/login" className="text-[#0E6BA8] font-semibold hover:underline">Inicia sesión</Link>
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A2647] via-[#144272] to-[#0E6BA8] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-6">
           <img src={imgLogo} alt="GESAP" className="h-12 mx-auto mb-3 drop-shadow-lg" />
           <h1 className="text-white text-2xl font-extrabold tracking-tight">Verificar cuenta</h1>
-          <p className="text-blue-200 text-sm mt-1">Ingresa el código de 6 caracteres de tu correo</p>
+          <p className="text-blue-200 text-sm mt-1">Ingresa el código de 6 caracteres enviado a {email}</p>
         </div>
 
         <div className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 sm:p-8">
@@ -126,16 +177,6 @@ export const VerificarPage = () => {
               </div>
               <p className="text-center text-xs text-slate-400 mt-2">Las letras se convierten en mayúsculas automáticamente</p>
             </div>
-
-            {/* Email field (si no vino por param) */}
-            {!emailParam && (
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">Tu correo</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@kinal.edu.gt"
-                  className="w-full border border-blue-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00ACC1] bg-white" />
-              </div>
-            )}
 
             <button type="submit" disabled={loading || codigo.length < 6}
               className="w-full bg-gradient-to-r from-[#0A2647] to-[#0E6BA8] hover:from-[#144272] hover:to-[#00ACC1] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-sm disabled:opacity-60">
