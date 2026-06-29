@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { FiFolder, FiUpload, FiCheckCircle, FiClock, FiTrash2, FiX } from 'react-icons/fi'
-import { getMisDocumentos, subirDocumento, eliminarDocumento, type Documento } from '../../../shared/api/documentos'
+import { FiFolder, FiUpload, FiCheckCircle, FiClock, FiTrash2, FiX, FiDownload } from 'react-icons/fi'
+import {
+  getMisDocumentos, subirDocumento, eliminarDocumento, listarPlantillas, getArchivoPlantilla,
+  type Documento, type Plantilla,
+} from '../../../shared/api/documentos'
 import toast from 'react-hot-toast'
 
 const TIPO_LABEL: Record<string, string> = {
@@ -16,6 +19,7 @@ export const MisDocumentosPage = () => {
   const [uploading, setUploading] = useState(false)
   const [deleting, setDeleting]   = useState<number | null>(null)
   const [form, setForm]           = useState({ tipo: 'OTRO' as Documento['tipo'], descripcion: '' })
+  const [plantillas, setPlantillas] = useState<Plantilla[]>([])
   const fileRef                   = useRef<HTMLInputElement>(null)
 
   const fetchDocs = () =>
@@ -25,6 +29,19 @@ export const MisDocumentosPage = () => {
       .finally(() => setLoading(false))
 
   useEffect(() => { fetchDocs() }, [])
+  useEffect(() => { listarPlantillas().then(({ data }) => setPlantillas(data)).catch(() => {}) }, [])
+
+  const plantillaActual = plantillas.find((p) => p.tipo === form.tipo)
+
+  const descargarPlantilla = async () => {
+    if (!plantillaActual) return
+    try {
+      const { data } = await getArchivoPlantilla(plantillaActual.tipo)
+      window.open(URL.createObjectURL(data), '_blank')
+    } catch {
+      toast.error('No se pudo abrir la plantilla')
+    }
+  }
 
   const handleSubir = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -129,6 +146,12 @@ export const MisDocumentosPage = () => {
                   <option value="CARTA_MEDICA">Carta Médica</option>
                   <option value="OTRO">Otro</option>
                 </select>
+                {plantillaActual && (
+                  <button type="button" onClick={descargarPlantilla}
+                    className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#0E6BA8] hover:underline">
+                    <FiDownload size={12} /> Descargar plantilla de este documento
+                  </button>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-[#144272] mb-1.5 uppercase tracking-wide">Descripción (opcional)</label>
