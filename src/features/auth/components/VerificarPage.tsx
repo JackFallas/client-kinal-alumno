@@ -5,6 +5,8 @@ import imgLogo from '../../../assets/img/GESAPLogo.svg'
 import { verificarApi, reenviarCodigoApi } from '../../../shared/api/auth'
 import toast from 'react-hot-toast'
 
+const DURACION_S = 5 * 60
+
 export const VerificarPage = () => {
   const navigate   = useNavigate()
   const [params]   = useSearchParams()
@@ -17,9 +19,17 @@ export const VerificarPage = () => {
   const [resending, setResending] = useState(false)
   const [success, setSuccess]     = useState(false)
   const [email, setEmail]         = useState(emailParam)
+  const [segundosRestantes, setSegundosRestantes] = useState(DURACION_S)
   const inputRefs                 = useRef<(HTMLInputElement | null)[]>([])
 
   useEffect(() => { if (step === 'code') inputRefs.current[0]?.focus() }, [step])
+
+  useEffect(() => {
+    if (step !== 'code') return
+    setSegundosRestantes(DURACION_S)
+    const interval = setInterval(() => setSegundosRestantes((s) => Math.max(0, s - 1)), 1000)
+    return () => clearInterval(interval)
+  }, [step])
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +93,7 @@ export const VerificarPage = () => {
       await reenviarCodigoApi(email)
       toast.success('Nuevo código enviado. Revisa tu correo.')
       setDigits(['', '', '', '', '', ''])
+      setSegundosRestantes(DURACION_S)
       inputRefs.current[0]?.focus()
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Error al reenviar')
@@ -175,10 +186,14 @@ export const VerificarPage = () => {
                   />
                 ))}
               </div>
-              <p className="text-center text-xs text-slate-400 mt-2">Las letras se convierten en mayúsculas automáticamente</p>
+              <p className={`text-center text-xs mt-2 ${segundosRestantes === 0 ? 'text-red-500 font-semibold' : 'text-slate-400'}`}>
+                {segundosRestantes === 0
+                  ? 'El código expiró'
+                  : `Expira en ${String(Math.floor(segundosRestantes / 60)).padStart(2, '0')}:${String(segundosRestantes % 60).padStart(2, '0')}`}
+              </p>
             </div>
 
-            <button type="submit" disabled={loading || codigo.length < 6}
+            <button type="submit" disabled={loading || codigo.length < 6 || segundosRestantes === 0}
               className="w-full bg-gradient-to-r from-[#0A2647] to-[#0E6BA8] hover:from-[#144272] hover:to-[#00ACC1] text-white py-3 rounded-xl text-sm font-bold transition-all shadow-sm disabled:opacity-60">
               {loading ? 'Verificando...' : 'Verificar cuenta'}
             </button>
