@@ -67,8 +67,13 @@ export const RegisterPage = () => {
         seccionId:         form.seccionId ? Number(form.seccionId) : undefined,
         seccionAcademicaId: form.seccionAcademicaId ? Number(form.seccionAcademicaId) : undefined,
       })
-      toast.success('¡Cuenta creada! Revisa tu correo.')
-      navigate(`/verificar?email=${encodeURIComponent(data.email)}`)
+      if (data.verificado) {
+        toast.success('¡Cuenta creada y verificada! Ya puedes iniciar sesión.')
+        navigate('/login')
+      } else {
+        toast.success('¡Cuenta creada! Revisa tu correo.')
+        navigate(`/verificar?email=${encodeURIComponent(data.email)}`)
+      }
     } catch (err: any) {
       toast.error(err?.response?.data?.message ?? 'Error al registrarse')
     } finally {

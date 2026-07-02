@@ -51,7 +51,7 @@ export const registrarApi = (data: {
   nivelAcademico: NivelAcademico
   seccionId?: number
   seccionAcademicaId?: number
-}) => api.post<{ message: string; email: string }>('/auth/registrar', data)
+}) => api.post<{ message: string; email: string; verificado: boolean }>('/auth/registrar', data)
 
 export const verificarApi = (data: { codigo: string; token?: string; email?: string }) =>
   api.post<{ message: string }>('/auth/verificar', data)
