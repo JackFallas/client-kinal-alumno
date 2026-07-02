@@ -47,6 +47,7 @@ export const registrarApi = (data: {
   segundoApellido?: string
   email: string
   password: string
+  fechaNacimiento?: string
   nivelAcademico: NivelAcademico
   seccionId?: number
   seccionAcademicaId?: number

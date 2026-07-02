@@ -24,6 +24,7 @@ export const RegisterPage = () => {
     email:             '',
     password:          '',
     confirm:           '',
+    fechaNacimiento:   '',
     nivelAcademico:    '' as NivelAcademico | '',
     seccionId:         '',
     seccionAcademicaId: '',
@@ -61,6 +62,7 @@ export const RegisterPage = () => {
         segundoApellido:   form.segundoApellido || undefined,
         email:             form.email,
         password:          form.password,
+        fechaNacimiento:   form.fechaNacimiento || undefined,
         nivelAcademico:    form.nivelAcademico,
         seccionId:         form.seccionId ? Number(form.seccionId) : undefined,
         seccionAcademicaId: form.seccionAcademicaId ? Number(form.seccionAcademicaId) : undefined,
@@ -115,10 +117,17 @@ export const RegisterPage = () => {
               </div>
             </div>
 
-            {/* Carnet */}
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">Carnet (7 dígitos)</label>
-              <input type="text" value={form.carnet} onChange={(e) => set('carnet', e.target.value.replace(/\D/g, '').slice(0, 7))} maxLength={7} className={inputCls} placeholder="2024001" />
+            {/* Carnet y fecha de nacimiento */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Carnet (7 dígitos)</label>
+                <input type="text" value={form.carnet} onChange={(e) => set('carnet', e.target.value.replace(/\D/g, '').slice(0, 7))} maxLength={7} className={inputCls} placeholder="2024001" />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Fecha de nacimiento *</label>
+                <input type="date" value={form.fechaNacimiento} onChange={(e) => set('fechaNacimiento', e.target.value)} required
+                  max={new Date().toISOString().split('T')[0]} className={inputCls} />
+              </div>
             </div>
 
             {/* Email y password */}
