@@ -41,22 +41,20 @@ export const RegisterPage = () => {
 
   const set = (f: string, v: string) => setForm((p) => ({ ...p, [f]: v }))
 
-  const buscarSeccion = (codigoTexto: string, tipo: 'principal' | 'academica'): Seccion | null => {
+  // El catálogo real no distingue carrera técnica vs académica por el campo `carrera`
+  // (en producción ninguna sección de Diversificado tiene carrera nula) — ambos campos
+  // validan contra el mismo catálogo por nivel, solo cambia si son obligatorios u opcionales.
+  const buscarSeccion = (codigoTexto: string): Seccion | null => {
     const codigo = codigoTexto.trim().toUpperCase()
     if (!codigo) return null
-    return secciones.find((s) => {
-      if (s.codigo.toUpperCase() !== codigo) return false
-      if (form.nivelAcademico === 'BASICOS') return s.nivel === 'BASICOS'
-      if (s.nivel !== 'DIVERSIFICADOS') return false
-      return tipo === 'principal' ? !!s.carrera : !s.carrera
-    }) ?? null
+    return secciones.find((s) => s.codigo.toUpperCase() === codigo && s.nivel === form.nivelAcademico) ?? null
   }
 
   // Sección principal (Básicos o técnica de Diversificados): valida contra el catálogo con debounce
   useEffect(() => {
     if (!seccionTexto) { setSeccionStatus('idle'); set('seccionId', ''); return }
     const t = setTimeout(() => {
-      const match = buscarSeccion(seccionTexto, 'principal')
+      const match = buscarSeccion(seccionTexto)
       setSeccionStatus(match ? 'found' : 'notfound')
       set('seccionId', match ? String(match.id) : '')
     }, 400)
@@ -68,7 +66,7 @@ export const RegisterPage = () => {
   useEffect(() => {
     if (!seccionAcademicaTexto) { setSeccionAcademicaStatus('idle'); set('seccionAcademicaId', ''); return }
     const t = setTimeout(() => {
-      const match = buscarSeccion(seccionAcademicaTexto, 'academica')
+      const match = buscarSeccion(seccionAcademicaTexto)
       setSeccionAcademicaStatus(match ? 'found' : 'notfound')
       set('seccionAcademicaId', match ? String(match.id) : '')
     }, 400)
