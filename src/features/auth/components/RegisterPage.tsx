@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { FiUser, FiMail, FiLock, FiBook } from 'react-icons/fi'
+import { FiUser, FiMail, FiLock, FiBook, FiCheck, FiX } from 'react-icons/fi'
 import imgLogo from '../../../assets/img/GESAPLogo.svg'
 import { registrarApi, type NivelAcademico } from '../../../shared/api/auth'
-import { getSecciones } from '../../../shared/api/secciones'
+import { getSecciones, type Seccion } from '../../../shared/api/secciones'
 import toast from 'react-hot-toast'
 
-interface Seccion { id: number; codigo: string; nombre: string; nivel: string; grado: number }
+type SeccionStatus = 'idle' | 'found' | 'notfound'
 
 const inputCls = "w-full border border-blue-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00ACC1] focus:border-transparent bg-white"
 
@@ -30,15 +30,51 @@ export const RegisterPage = () => {
     seccionAcademicaId: '',
   })
 
+  const [seccionTexto, setSeccionTexto] = useState('')
+  const [seccionAcademicaTexto, setSeccionAcademicaTexto] = useState('')
+  const [seccionStatus, setSeccionStatus] = useState<SeccionStatus>('idle')
+  const [seccionAcademicaStatus, setSeccionAcademicaStatus] = useState<SeccionStatus>('idle')
+
   useEffect(() => {
     getSecciones().then((r) => setSecciones(r.data)).catch(() => {})
   }, [])
 
   const set = (f: string, v: string) => setForm((p) => ({ ...p, [f]: v }))
 
-  const secBasicos       = secciones.filter((s) => s.nivel === 'BASICOS')
-  const secDivTecnicas   = secciones.filter((s) => s.nivel === 'DIVERSIFICADOS')
-  const secDivAcademicas = secciones.filter((s) => s.nivel === 'DIVERSIFICADOS')
+  const buscarSeccion = (codigoTexto: string, tipo: 'principal' | 'academica'): Seccion | null => {
+    const codigo = codigoTexto.trim().toUpperCase()
+    if (!codigo) return null
+    return secciones.find((s) => {
+      if (s.codigo.toUpperCase() !== codigo) return false
+      if (form.nivelAcademico === 'BASICOS') return s.nivel === 'BASICOS'
+      if (s.nivel !== 'DIVERSIFICADOS') return false
+      return tipo === 'principal' ? !!s.carrera : !s.carrera
+    }) ?? null
+  }
+
+  // Sección principal (Básicos o técnica de Diversificados): valida contra el catálogo con debounce
+  useEffect(() => {
+    if (!seccionTexto) { setSeccionStatus('idle'); set('seccionId', ''); return }
+    const t = setTimeout(() => {
+      const match = buscarSeccion(seccionTexto, 'principal')
+      setSeccionStatus(match ? 'found' : 'notfound')
+      set('seccionId', match ? String(match.id) : '')
+    }, 400)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seccionTexto, form.nivelAcademico, secciones])
+
+  // Sección académica (solo Diversificados, opcional)
+  useEffect(() => {
+    if (!seccionAcademicaTexto) { setSeccionAcademicaStatus('idle'); set('seccionAcademicaId', ''); return }
+    const t = setTimeout(() => {
+      const match = buscarSeccion(seccionAcademicaTexto, 'academica')
+      setSeccionAcademicaStatus(match ? 'found' : 'notfound')
+      set('seccionAcademicaId', match ? String(match.id) : '')
+    }, 400)
+    return () => clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seccionAcademicaTexto, form.nivelAcademico, secciones])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,6 +85,14 @@ export const RegisterPage = () => {
     }
     if (!form.nivelAcademico) {
       toast.error('Selecciona tu nivel académico')
+      return
+    }
+    if (!form.seccionId) {
+      toast.error(seccionStatus === 'notfound' ? 'Esa sección no existe' : 'Escribe tu sección')
+      return
+    }
+    if (seccionAcademicaTexto && !form.seccionAcademicaId) {
+      toast.error('Esa sección académica no existe')
       return
     }
 
@@ -166,7 +210,11 @@ export const RegisterPage = () => {
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {(['BASICOS', 'DIVERSIFICADOS'] as NivelAcademico[]).map((n) => (
                   <button key={n} type="button"
-                    onClick={() => { set('nivelAcademico', n); set('seccionId', ''); set('seccionAcademicaId', '') }}
+                    onClick={() => {
+                      set('nivelAcademico', n); set('seccionId', ''); set('seccionAcademicaId', '')
+                      setSeccionTexto(''); setSeccionAcademicaTexto('')
+                      setSeccionStatus('idle'); setSeccionAcademicaStatus('idle')
+                    }}
                     className={`py-2.5 rounded-xl text-sm font-semibold border transition-all ${
                       form.nivelAcademico === n
                         ? 'bg-[#0E6BA8] border-[#0E6BA8] text-white'
@@ -178,31 +226,34 @@ export const RegisterPage = () => {
               </div>
 
               {form.nivelAcademico === 'BASICOS' && (
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Sección *</label>
-                  <select value={form.seccionId} onChange={(e) => set('seccionId', e.target.value)} required className={inputCls}>
-                    <option value="">Seleccionar sección</option>
-                    {secBasicos.map((s) => <option key={s.id} value={s.id}>{s.codigo} — {s.nombre}</option>)}
-                  </select>
-                </div>
+                <SeccionInput
+                  label="Sección *"
+                  placeholder="Ej. IN6CM"
+                  value={seccionTexto}
+                  onChange={setSeccionTexto}
+                  status={seccionStatus}
+                  match={secciones.find((s) => String(s.id) === form.seccionId) ?? null}
+                />
               )}
 
               {form.nivelAcademico === 'DIVERSIFICADOS' && (
                 <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Sección técnica *</label>
-                    <select value={form.seccionId} onChange={(e) => set('seccionId', e.target.value)} required className={inputCls}>
-                      <option value="">Seleccionar sección técnica</option>
-                      {secDivTecnicas.map((s) => <option key={s.id} value={s.id}>{s.codigo} — {s.nombre}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs text-slate-500 mb-1">Sección académica</label>
-                    <select value={form.seccionAcademicaId} onChange={(e) => set('seccionAcademicaId', e.target.value)} className={inputCls}>
-                      <option value="">Seleccionar sección académica</option>
-                      {secDivAcademicas.map((s) => <option key={s.id} value={s.id}>{s.codigo} — {s.nombre}</option>)}
-                    </select>
-                  </div>
+                  <SeccionInput
+                    label="Sección técnica *"
+                    placeholder="Ej. IN6CM"
+                    value={seccionTexto}
+                    onChange={setSeccionTexto}
+                    status={seccionStatus}
+                    match={secciones.find((s) => String(s.id) === form.seccionId) ?? null}
+                  />
+                  <SeccionInput
+                    label="Sección académica"
+                    placeholder="Ej. PE5A"
+                    value={seccionAcademicaTexto}
+                    onChange={setSeccionAcademicaTexto}
+                    status={seccionAcademicaStatus}
+                    match={secciones.find((s) => String(s.id) === form.seccionAcademicaId) ?? null}
+                  />
                 </div>
               )}
             </div>
@@ -222,3 +273,33 @@ export const RegisterPage = () => {
     </div>
   )
 }
+
+const SeccionInput = ({ label, placeholder, value, onChange, status, match }: {
+  label: string
+  placeholder: string
+  value: string
+  onChange: (v: string) => void
+  status: SeccionStatus
+  match: Seccion | null
+}) => (
+  <div>
+    <label className="block text-xs text-slate-500 mb-1">{label}</label>
+    <div className="relative">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value.toUpperCase())}
+        placeholder={placeholder}
+        className={`${inputCls} pr-9 uppercase ${status === 'notfound' ? 'border-red-300 focus:ring-red-400' : status === 'found' ? 'border-green-300 focus:ring-green-400' : ''}`}
+      />
+      {status === 'found' && <FiCheck className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" />}
+      {status === 'notfound' && <FiX className="absolute right-3 top-1/2 -translate-y-1/2 text-red-500" />}
+    </div>
+    {status === 'found' && match && (
+      <p className="text-xs text-green-600 mt-1">{match.nombre}</p>
+    )}
+    {status === 'notfound' && (
+      <p className="text-xs text-red-500 mt-1">Esa sección no existe</p>
+    )}
+  </div>
+)
