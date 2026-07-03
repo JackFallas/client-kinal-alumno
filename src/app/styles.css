@@ -78,4 +78,7 @@ body {
   .blob-drift, .float-idle, .pop-enter, .step-enter, .step-enter-item {
     animation: none !important;
   }
+  .pop-enter, .step-enter-item {
+    opacity: 1 !important;
+  }
 }
