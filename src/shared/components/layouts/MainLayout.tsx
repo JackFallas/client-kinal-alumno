@@ -128,7 +128,7 @@ export const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-screen bg-[#EBF5FB]">
+    <div className="flex h-screen overflow-hidden bg-[#EBF5FB]">
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
