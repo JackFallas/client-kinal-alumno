@@ -14,6 +14,7 @@ export interface AuthUser {
   nivelAcademico?: NivelAcademico
   seccion?: { id: number; codigo: string; nombre: string }
   fotoPerfil?: string | null
+  fechaNacimiento?: string | null
 }
 
 export const loginApi = (email: string, password: string, recordar?: boolean) =>
@@ -38,6 +39,9 @@ export const cambiarFotoPerfilApi = (formData: FormData) =>
   })
 
 export const eliminarFotoPerfilApi = () => api.delete('/usuarios/foto-perfil')
+
+export const actualizarMiFechaNacimientoApi = (fechaNacimiento: string) =>
+  api.patch<{ fechaNacimiento: string }>('/usuarios/me/fecha-nacimiento', { fechaNacimiento })
 
 export const registrarApi = (data: {
   carnet?: string
