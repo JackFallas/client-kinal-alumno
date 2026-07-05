@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FiPhone, FiPlus, FiTrash2, FiUsers } from 'react-icons/fi'
+import { FiPhone, FiMail, FiPlus, FiTrash2, FiUsers } from 'react-icons/fi'
 import toast from 'react-hot-toast'
 import {
   getMisContactos, crearContacto, eliminarContacto,
@@ -7,7 +7,7 @@ import {
 } from '../../../shared/api/contactosEmergencia'
 
 const MAX_CONTACTOS = 4
-const EMPTY_FORM = { nombre: '', parentesco: '', telefono: '' }
+const EMPTY_FORM = { nombre: '', parentesco: '', telefono: '', email: '' }
 
 const inputCls = "w-full border border-blue-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00ACC1] focus:border-transparent shadow-sm bg-white"
 
@@ -78,6 +78,7 @@ export const ContactosEmergenciaSection = () => {
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-[#0A2647] truncate">{c.nombre} <span className="text-xs font-normal text-slate-400">· {c.parentesco}</span></p>
                 <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5"><FiPhone size={11} /> {c.telefono}</p>
+                <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5 truncate"><FiMail size={11} /> {c.email}</p>
               </div>
               <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-600 shrink-0 p-1.5 hover:bg-red-50 rounded-lg transition-colors">
                 <FiTrash2 size={15} />
@@ -105,6 +106,10 @@ export const ContactosEmergenciaSection = () => {
               <label className="block text-xs font-semibold text-[#144272] mb-1.5 uppercase tracking-wide">Teléfono *</label>
               <input value={form.telefono} onChange={(e) => set('telefono', e.target.value)} required placeholder="55512345" className={inputCls} />
             </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-[#144272] mb-1.5 uppercase tracking-wide">Correo *</label>
+            <input type="email" value={form.email} onChange={(e) => set('email', e.target.value)} required placeholder="maria.lopez@gmail.com" className={inputCls} />
           </div>
           <div className="flex gap-3 pt-1">
             <button type="button" onClick={() => { setShowForm(false); setForm({ ...EMPTY_FORM }) }}

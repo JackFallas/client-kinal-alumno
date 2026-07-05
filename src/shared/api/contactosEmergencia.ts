@@ -5,12 +5,14 @@ export interface ContactoEmergencia {
   nombre: string
   parentesco: string
   telefono: string
+  email: string
 }
 
 export interface ContactoEmergenciaInput {
   nombre: string
   parentesco: string
   telefono: string
+  email: string
 }
 
 export const getMisContactos = () => api.get<ContactoEmergencia[]>('/contactos-emergencia/mis-contactos')
